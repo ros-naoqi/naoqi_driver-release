@@ -15,27 +15,22 @@
  *
 */
 
+#include "driver_helpers.hpp"
 
-#ifndef BRIDGE_HELPERS_HPP
-#define BRIDGE_HELPERS_HPP
-
-#include <alrosbridge/tools.hpp>
-
-#include <qi/applicationsession.hpp>
-
-namespace alros
+namespace naoqi
 {
 namespace helpers
 {
-namespace bridge
+namespace driver
 {
 
 /** Function that returns the type of a robot
  */
-inline robot::Robot robot( const qi::SessionPtr& session)
+static robot::Robot robot( const qi::SessionPtr& session)
 {
   robot::Robot bot;
 
+  std::cout << "I am going to call RobotModel proxy" << std::endl;
   qi::AnyObject p_memory = session->service("ALMemory");
   std::string robot = p_memory.call<std::string>("getData", "RobotConfig/Body/Type" );
   std::transform(robot.begin(), robot.end(), robot.begin(), ::tolower);
@@ -56,14 +51,13 @@ inline robot::Robot robot( const qi::SessionPtr& session)
   }
 }
 
-static const robot::Robot& getRobot( const qi::SessionPtr& session )
+const robot::Robot& getRobot( const qi::SessionPtr& session )
 {
-  static const robot::Robot r = robot( session );
+  static const robot::Robot r = robot(session);
   return r;
 }
 
-} // naoqi
+} // driver
 } // helpers
-} // alros
+} // naoqi
 
-#endif
