@@ -22,14 +22,14 @@
 * LOCAL includes
 */
 #include "converter_base.hpp"
-#include <alrosbridge/message_actions.h>
+#include <naoqi_driver/message_actions.h>
 
 /*
 * ROS includes
 */
 #include <diagnostic_msgs/DiagnosticArray.h>
 
-namespace alros
+namespace naoqi
 {
 namespace converter
 {
@@ -56,10 +56,6 @@ public:
 private:
   /** The names of the joints in the order given by the motion proxy */
   std::vector<std::string> joint_names_;
-  /** The list of the ALMemory keys for joint temperatures */
-  std::vector<std::string> joint_temperatures_keys_;
-  /** The list of the ALMemory keys for the battery */
-  std::vector<std::string> battery_keys_;
   /** all the keys to check. It is a concatenation of joint_temperatures_keys_, battery_keys_ */
   std::vector<std::string> all_keys_;
   /** Keys for the battery status */
@@ -67,6 +63,8 @@ private:
 
   /** Proxy to ALMemory */
   qi::AnyObject p_memory_;
+  /** Proxy to ALBodyTemperature */
+  qi::AnyObject p_body_temperature_;
 
   float temperature_warn_level_;
   float temperature_error_level_;
@@ -76,6 +74,6 @@ private:
 };
 
 } //converter
-} // alros
+} // naoqi
 
 #endif
