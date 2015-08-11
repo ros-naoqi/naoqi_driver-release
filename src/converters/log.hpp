@@ -20,13 +20,13 @@
 
 #include <rosgraph_msgs/Log.h>
 
-#include <alrosbridge/message_actions.h>
+#include <naoqi_driver/message_actions.h>
 #include "converter_base.hpp"
 
 #include <qicore/logmanager.hpp>
 #include <qicore/loglistener.hpp>
 
-namespace alros
+namespace naoqi
 {
 namespace converter
 {
@@ -46,13 +46,18 @@ public:
   void callAll( const std::vector<message_actions::MessageAction>& actions );
 
 private:
+  /** Function that sets the NAOqi log level to the ROS one */
+  void set_qi_logger_level();
+
   qi::LogManagerPtr logger_;
+  /** Log level that is currently translated to ROS */
+  qi::LogLevel log_level_;
   qi::LogListenerPtr listener_;
 
   std::map<message_actions::MessageAction, Callback_t> callbacks_;
 };
 
 } //publisher
-} //alros
+} //naoqi
 
 #endif

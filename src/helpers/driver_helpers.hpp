@@ -16,52 +16,24 @@
 */
 
 
-#ifndef ALROS_TOOLS_HPP
-#define ALROS_TOOLS_HPP
+#ifndef DRIVER_HELPERS_HPP
+#define DRIVER_HELPERS_HPP
 
-#define RESETCOLOR "\033[0m"
-#define GREEN "\033[32m"
-#define HIGHGREEN "\033[92m"
-#define BOLDRED "\033[1m\033[31m"
-#define YELLOW "\033[33m"
-#define BOLDYELLOW "\033[1m\033[33m"
-#define BOLDCYAN "\033[1m\033[36m"
+#include <naoqi_driver/tools.hpp>
 
-# include <qi/anyobject.hpp>
+#include <qi/applicationsession.hpp>
 
-namespace alros
+namespace naoqi
+{
+namespace helpers
+{
+namespace driver
 {
 
-namespace robot
-{
-enum Robot
-{
-  UNIDENTIFIED,
-  NAO,
-  PEPPER
-};
-}
+const robot::Robot& getRobot( const qi::SessionPtr& session );
 
-enum Topics {
-  Laser = 0,
-  Camera,
-  Sonar
-};
-
-namespace dataType {
-enum DataType
-{
-  None = 0,
-  Float,
-  Int,
-  String,
-  Bool
-};
-}
-
-} // alros
-
-QI_TYPE_ENUM_REGISTER(alros::Topics);
-QI_TYPE_ENUM_REGISTER(alros::dataType::DataType);
+} // driver
+} // helpers
+} // naoqi
 
 #endif
