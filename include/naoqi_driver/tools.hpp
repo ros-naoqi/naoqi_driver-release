@@ -15,30 +15,53 @@
  *
 */
 
-/*
-* LOCAL includes
-*/
-#include "float.hpp"
+
+#ifndef ALROS_TOOLS_HPP
+#define ALROS_TOOLS_HPP
+
+#define RESETCOLOR "\033[0m"
+#define GREEN "\033[32m"
+#define HIGHGREEN "\033[92m"
+#define BOLDRED "\033[1m\033[31m"
+#define YELLOW "\033[33m"
+#define BOLDYELLOW "\033[1m\033[33m"
+#define BOLDCYAN "\033[1m\033[36m"
+
+# include <qi/anyobject.hpp>
 
 namespace naoqi
 {
-namespace publisher
-{
 
-MemoryFloatPublisher::MemoryFloatPublisher( const std::string& topic ):
-  BasePublisher( topic )
-{}
-
-void MemoryFloatPublisher::publish( const naoqi_bridge_msgs::FloatStamped& msg )
+namespace robot
 {
-  pub_.publish( msg );
+enum Robot
+{
+  UNIDENTIFIED,
+  NAO,
+  PEPPER
+};
 }
 
-void MemoryFloatPublisher::reset( ros::NodeHandle& nh )
+enum Topics {
+  Laser = 0,
+  Camera,
+  Sonar
+};
+
+namespace dataType {
+enum DataType
 {
-  pub_ = nh.advertise< naoqi_bridge_msgs::FloatStamped >( topic_, 10 );
-  is_initialized_ = true;
+  None = 0,
+  Float,
+  Int,
+  String,
+  Bool
+};
 }
 
-} //publisher
 } // naoqi
+
+QI_TYPE_ENUM_REGISTER(naoqi::Topics);
+QI_TYPE_ENUM_REGISTER(naoqi::dataType::DataType);
+
+#endif
