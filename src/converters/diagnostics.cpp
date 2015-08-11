@@ -32,7 +32,21 @@
 #include <boost/foreach.hpp>
 #define for_each BOOST_FOREACH
 
-namespace alros
+namespace
+{
+void setMessageFromStatus(diagnostic_updater::DiagnosticStatusWrapper &status)
+{
+  if (status.level == diagnostic_msgs::DiagnosticStatus::OK) {
+    status.message = "OK";
+  } else if (status.level == diagnostic_msgs::DiagnosticStatus::WARN) {
+    status.message = "WARN";
+  } else {
+    status.message = "ERROR";
+  }
+}
+}
+
+namespace naoqi
 {
 namespace converter
 {
@@ -40,37 +54,36 @@ namespace converter
 DiagnosticsConverter::DiagnosticsConverter( const std::string& name, float frequency, const qi::SessionPtr& session ):
     BaseConverter( name, frequency, session ),
     p_memory_(session->service("ALMemory")),
+    p_body_temperature_(session->service("ALBodyTemperature")),
     temperature_warn_level_(68),
     temperature_error_level_(74)
 {
+  // Allow for temperature reporting (for CPU)
+  p_body_temperature_.call<void>("setEnableNotifications", true);
+
   // Get all the joint names
   qi::AnyObject p_motion = session->service("ALMotion");
   joint_names_ = p_motion.call<std::vector<std::string> >("getBodyNames", "JointActuators" );
 
-  for(std::vector<std::string>::const_iterator it = joint_names_.begin(); it != joint_names_.end(); ++it)
-    joint_temperatures_keys_.push_back(std::string("Device/SubDeviceList/") + (*it) + std::string("/Temperature/Sensor/Value"));
+  for(std::vector<std::string>::const_iterator it = joint_names_.begin(); it != joint_names_.end(); ++it) {
+    all_keys_.push_back(std::string("Device/SubDeviceList/") + (*it) + std::string("/Temperature/Sensor/Value"));
+    all_keys_.push_back(std::string("Device/SubDeviceList/") + (*it) + std::string("/Hardness/Actuator/Value"));
+  }
 
   // Get all the battery keys
-  battery_keys_.push_back(std::string("Device/SubDeviceList/Battery/Charge/Sensor/Value"));
-  battery_keys_.push_back(std::string("Device/SubDeviceList/Battery/Charge/Sensor/Status"));
-  battery_keys_.push_back(std::string("Device/SubDeviceList/Battery/Current/Sensor/Value"));
+  all_keys_.push_back(std::string("BatteryChargeChanged"));
+  all_keys_.push_back(std::string("BatteryPowerPluggedChanged"));
+  all_keys_.push_back(std::string("BatteryFullChargedFlagChanged"));
+  all_keys_.push_back(std::string("Device/SubDeviceList/Battery/Current/Sensor/Value"));
 
-  std::string battery_status_keys[] = {"End off Discharge flag", "Near End Off Discharge flag", "Charge FET on",
-    "Discharge FET on", "Accu learn flag", "Discharging flag", "Full Charge Flag", "Charge Flag",
-    "Charge Temperature Alarm", "Over Charge Alarm", "Discharge Alarm", "Charge Over Current Alarm",
-    "Discharge Over Current Alarm (14A)", "Discharge Over Current Alarm (6A)", "Discharge Temperature Alarm",
-    "Power-Supply present"};
-  battery_status_keys_ = std::vector<std::string>(battery_status_keys, battery_status_keys+16);
+  std::string battery_status_keys[] = {"Charging", "Fully Charged"};
+  battery_status_keys_ = std::vector<std::string>(battery_status_keys, battery_status_keys+2);
+
+  // Get the CPU keys
+  // TODO check that: it is apparently always -1 ...
+  //all_keys_.push_back(std::string("HeadProcessorIsHot"));
 
   // TODO get ID from Device/DeviceList/ChestBoard/BodyId
-
-  // Concatenate the keys in all_keys_
-  all_keys_.resize(joint_temperatures_keys_.size() + battery_keys_.size());
-  size_t i = 0;
-  for(std::vector<std::string>::const_iterator it = joint_temperatures_keys_.begin(); it != joint_temperatures_keys_.end(); ++it, ++i)
-    all_keys_[i] = *it;
-  for(std::vector<std::string>::const_iterator it = battery_keys_.begin(); it != battery_keys_.end(); ++it, ++i)
-    all_keys_[i] = *it;
 }
 
 void DiagnosticsConverter::callAll( const std::vector<message_actions::MessageAction>& actions )
@@ -89,21 +102,33 @@ void DiagnosticsConverter::callAll( const std::vector<message_actions::MessageAc
     return;
   }
 
-  // Fill the temperature message for the joints
+  // Fill the temperature / stiffness message for the joints
+  double maxTemperature = 0.0;
+  double maxStiffness = 0.0;
+  double minStiffness = 1.0;
+  double minStiffnessWoHands = 1.0;
+  std::stringstream hotJointsSS;
+
   size_t val = 0;
   diagnostic_msgs::DiagnosticStatus::_level_type max_level = diagnostic_msgs::DiagnosticStatus::OK;
-  for(size_t i = 0; i < joint_names_.size(); ++val, ++i)
+  for(size_t i = 0; i < joint_names_.size(); ++i)
   {
     diagnostic_updater::DiagnosticStatusWrapper status;
-    status.name = std::string("/Joints/") + joint_names_[i];
+    status.name = std::string("naoqi_driver_joints:") + joint_names_[i];
 
+    double temperature = static_cast<double>(values[val++]);
+    double stiffness = static_cast<double>(values[val++]);
+
+    // Fill the status data
     status.hardware_id = joint_names_[i];
-    float temperature = values[val];
-    status.add("Temperature", float(values[val]));
+    status.add("Temperature", temperature);
+    status.add("Stiffness", stiffness);
+
+    // Define the level
     if (temperature < temperature_warn_level_)
     {
       status.level = diagnostic_msgs::DiagnosticStatus::OK;
-      status.message = "Normal";
+      status.message = "OK";
     }
     else if (temperature < temperature_error_level_)
     {
@@ -116,76 +141,95 @@ void DiagnosticsConverter::callAll( const std::vector<message_actions::MessageAc
       status.message = "Too hot";
     }
 
-    max_level = std::max(max_level, status.level);
     msg.status.push_back(status);
+
+    // Fill the joint data for later processing
+    max_level = std::max(max_level, status.level);
+    maxTemperature = std::max(maxTemperature, temperature);
+    maxStiffness = std::max(maxStiffness, stiffness);
+    minStiffness = std::min(minStiffness, stiffness);
+    if(joint_names_[i].find("Hand") == std::string::npos)
+      minStiffnessWoHands = std::min(minStiffnessWoHands, stiffness);
+    if(status.level >= (int) diagnostic_msgs::DiagnosticStatus::WARN) {
+      hotJointsSS << std::endl << joint_names_[i] << ": " << temperature << "°C";
+    }
   }
 
-  // Get the aggregated joints
+  // Get the aggregated joints status
   {
     diagnostic_updater::DiagnosticStatusWrapper status;
-    status.name = std::string("/Joints");
+    status.name = std::string("naoqi_driver_joints:Status");
     status.hardware_id = "joints";
     status.level = max_level;
+    setMessageFromStatus(status);
+
+    status.add("Highest Temperature", maxTemperature);
+    status.add("Highest Stiffness", maxStiffness);
+    status.add("Lowest Stiffness", minStiffness);
+    status.add("Lowest Stiffness without Hands", minStiffnessWoHands);
+    status.add("Hot Joints", hotJointsSS.str());
 
     msg.status.push_back(status);
   }
 
   // Fill the message for the battery
   {
-    int battery_percentage = 100.0 * float(values[val++]);
-    int battery_status = int(float(values[val++]));
+    int battery_percentage = static_cast<int>(values[val++]);
 
     diagnostic_updater::DiagnosticStatusWrapper status;
-    status.name = std::string("/Battery/Battery");
+    status.name = std::string("naoqi_driver_battery:Status");
     status.hardware_id = "battery";
     status.add("Percentage", battery_percentage);
-    for( size_t i = 0; i < battery_status_keys_.size(); ++i)
-      status.add(battery_status_keys_[i], bool((1 << i) && battery_status));
-    //status.add("Status", std::string());
+    // Add the semantic info
+    std::stringstream ss;
+    for( size_t i = 0; i < battery_status_keys_.size(); ++i) {
+      bool value = bool(values[val++]);
+      status.add(battery_status_keys_[i], value);
 
-    // TODO, convert battery_status to a string of binary 0101010
-    status.add("Status", battery_status);
-
-    std::ostringstream ss;
-    if (bool((1 << 6) && battery_status))
-    {
-      status.level = diagnostic_msgs::DiagnosticStatus::OK;
-      ss << "Battery fully charged";
-    }
-    else if (bool((1 << 7) && battery_status))
-    {
-      status.level = diagnostic_msgs::DiagnosticStatus::OK;
-      ss << "Charging (" << std::setw(4) << battery_percentage << "%%)";
-    }
-    else
-    {
-      if (battery_percentage > 60)
+      if (i == 0)
+      {
+        if (value)
+        {
+          status.level = diagnostic_msgs::DiagnosticStatus::OK;
+          ss << "Charging (" << std::setw(4) << battery_percentage << "%)";
+        }
+        else
+        {
+          if (battery_percentage > 60)
+          {
+              status.level = diagnostic_msgs::DiagnosticStatus::OK;
+              ss << "Battery OK (" << std::setw(4) << battery_percentage << "% left)";
+          }
+          else if (battery_percentage > 30)
+          {
+              status.level = diagnostic_msgs::DiagnosticStatus::WARN;
+              ss << "Battery discharging (" << std::setw(4) << battery_percentage << "% left)";
+          }
+          else
+          {
+              status.level = diagnostic_msgs::DiagnosticStatus::ERROR;
+              ss << "Battery almost empty (" << std::setw(4) << battery_percentage << "% left)";
+          }
+        }
+      }
+      else if ((i == 1) && value)
       {
         status.level = diagnostic_msgs::DiagnosticStatus::OK;
-        ss << "Battery OK (" << std::setw(4) << battery_percentage << "%% left)";
-      }
-      else if (battery_percentage > 30)
-      {
-        status.level = diagnostic_msgs::DiagnosticStatus::WARN;
-        ss << "Battery discharging (" << std::setw(4) << battery_percentage << "%% left)";
-      }
-      else
-      {
-        status.level = diagnostic_msgs::DiagnosticStatus::ERROR;
-        ss << "Battery almost empty (" << std::setw(4) << battery_percentage << "%% left)";
+        status.message = "Battery fully charged";
       }
     }
-    status.message = ss.str();
+    if (!ss.str().empty())
+      status.message = ss.str();
 
     max_level = status.level;
     msg.status.push_back(status);
   }
 
-  // Process the current information
+  // Process the current battery information
   {
     float current = float(values[val++]);
     diagnostic_updater::DiagnosticStatusWrapper status;
-    status.name = std::string("/Battery/Current");
+    status.name = std::string("naoqi_driver_battery:Current");
     status.hardware_id = "battery";
     status.add("Current", current);
     status.level = max_level;
@@ -199,17 +243,18 @@ void DiagnosticsConverter::callAll( const std::vector<message_actions::MessageAc
     msg.status.push_back(status);
   }
 
-  // Get the aggregated battery
+  // TODO: CPU information should be obtained from system files like done in Python
+  // We can still get the temperature
   {
     diagnostic_updater::DiagnosticStatusWrapper status;
-    status.name = std::string("/Battery");
-    status.hardware_id = "battery";
+    status.name = std::string("naoqi_driver_computer:CPU");
     status.level = diagnostic_msgs::DiagnosticStatus::OK;
+    //status.add("Temperature", static_cast<float>(values[val++]));
+    // setting to -1 until we find the right key
+    status.add("Temperature", static_cast<float>(-1));
 
     msg.status.push_back(status);
   }
-
-  // TODO: CPU information should be obtained from system files like done in Python
 
   // TODO: wifi and ethernet statuses should be obtained from DBUS
 
@@ -230,4 +275,4 @@ void DiagnosticsConverter::registerCallback( const message_actions::MessageActio
 }
 
 } //converter
-} // alros
+} // naoqi
