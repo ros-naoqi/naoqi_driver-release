@@ -21,36 +21,48 @@
 #include "teleop.hpp"
 
 
-namespace alros
+namespace naoqi
 {
 namespace subscriber
 {
 
-TeleopSubscriber::TeleopSubscriber( const std::string& name, const std::string& topic, const qi::SessionPtr& session ):
-  BaseSubscriber( name, topic, session ),
+TeleopSubscriber::TeleopSubscriber( const std::string& name, const std::string& cmd_vel_topic, const std::string& joint_angles_topic, const qi::SessionPtr& session ):
+  cmd_vel_topic_(cmd_vel_topic),
+  joint_angles_topic_(joint_angles_topic),
+  BaseSubscriber( name, cmd_vel_topic, session ),
   p_motion_( session->service("ALMotion") )
 {}
 
 void TeleopSubscriber::reset( ros::NodeHandle& nh )
 {
-  sub_teleop_ = nh.subscribe( topic_, 10, &TeleopSubscriber::callback, this );
+  sub_cmd_vel_ = nh.subscribe( cmd_vel_topic_, 10, &TeleopSubscriber::cmd_vel_callback, this );
+  sub_joint_angles_ = nh.subscribe( joint_angles_topic_, 10, &TeleopSubscriber::joint_angles_callback, this );
 
   is_initialized_ = true;
 }
 
-void TeleopSubscriber::callback( const geometry_msgs::TwistConstPtr& twist_msg )
+void TeleopSubscriber::cmd_vel_callback( const geometry_msgs::TwistConstPtr& twist_msg )
 {
-  static const float max_x = 0.2;
-  static const float max_y = 0.2;
-  static const float max_th = 0.2;
-
-  const float vel_x = ( fabs(twist_msg->linear.x) > max_x) ? copysign(1,twist_msg->linear.x)*max_x : twist_msg->linear.x;
-  const float vel_y = ( fabs(twist_msg->linear.y) > max_y) ? copysign(1,twist_msg->linear.y)*max_y : twist_msg->linear.y;
-  const float vel_th = ( fabs(twist_msg->angular.z) > max_th) ? copysign(1,twist_msg->angular.z)*max_y : twist_msg->angular.z;
+  // no need to check for max velocity since motion clamps the velocities internally
+  const float& vel_x = twist_msg->linear.x;
+  const float& vel_y = twist_msg->linear.y;
+  const float& vel_th = twist_msg->angular.z;
 
   std::cout << "going to move x: " << vel_x << " y: " << vel_y << " th: " << vel_th << std::endl;
-  p_motion_.call<void>("move", vel_x, vel_y, vel_th );
+  p_motion_.async<void>("move", vel_x, vel_y, vel_th );
+}
+
+void TeleopSubscriber::joint_angles_callback( const naoqi_bridge_msgs::JointAnglesWithSpeedConstPtr& js_msg )
+{
+  if ( js_msg->relative==0 )
+  {
+    p_motion_.async<void>("setAngles", js_msg->joint_names, js_msg->joint_angles, js_msg->speed);
+  }
+  else
+  {
+    p_motion_.async<void>("changeAngles", js_msg->joint_names, js_msg->joint_angles, js_msg->speed);
+  }
 }
 
 } //publisher
-} // alros
+} // naoqi
