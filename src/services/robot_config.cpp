@@ -15,29 +15,31 @@
  *
 */
 
-
-#ifndef DRIVER_HELPERS_HPP
-#define DRIVER_HELPERS_HPP
-
-#include <naoqi_driver/tools.hpp>
-
-#include <naoqi_bridge_msgs/RobotInfo.h>
-
-#include <qi/applicationsession.hpp>
+#include "robot_config.hpp"
+#include "../helpers/driver_helpers.hpp"
 
 namespace naoqi
 {
-namespace helpers
-{
-namespace driver
+namespace service
 {
 
-robot::Robot getRobot( const qi::SessionPtr& session );
+RobotConfigService::RobotConfigService( const std::string& name, const std::string& topic, const qi::SessionPtr& session )
+  : name_(name),
+  topic_(topic),
+  session_(session)
+{}
 
-const naoqi_bridge_msgs::RobotInfo& getRobotInfo( const qi::SessionPtr& session );
+void RobotConfigService::reset( ros::NodeHandle& nh )
+{
+  service_ = nh.advertiseService(topic_, &RobotConfigService::callback, this);
+}
 
-} // driver
-} // helpers
-} // naoqi
+bool RobotConfigService::callback( naoqi_bridge_msgs::GetRobotInfoRequest& req, naoqi_bridge_msgs::GetRobotInfoResponse& resp )
+{
+  resp.info = helpers::driver::getRobotInfo(session_);
+  return true;
+}
 
-#endif
+
+}
+}
