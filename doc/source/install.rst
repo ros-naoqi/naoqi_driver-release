@@ -63,6 +63,7 @@ How to install it
     qibuild add-config <tc_name> -t <tc_name>
 
   By default, qitoolchains don't come with ROS packages. So we need to add them manually.
+
   .. code-block:: console
 
     # Add a package that will find your local ROS installation
@@ -85,7 +86,7 @@ How to install it
   .. code-block:: console
 
     cd ~/qibuild_ws
-    qisrc add https://github.com/ros-naoqi/naoqi-driver.git
+    qisrc add https://github.com/ros-naoqi/naoqi_driver.git
     cd naoqi_driver
     qibuild configure -c <tc_name>
     qibuild make -c <tc_name>
