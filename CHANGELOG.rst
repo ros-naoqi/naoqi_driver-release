@@ -2,6 +2,11 @@
 Changelog for package naoqi_rosbridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.5.3 (2015-08-26)
+------------------
+* fix: advertise service in global ns
+* Contributors: Karsten Knese
+
 0.5.2 (2015-08-26)
 ------------------
 * build and run dependency v004 for bridge msgs
