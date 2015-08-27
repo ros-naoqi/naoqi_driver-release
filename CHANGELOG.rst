@@ -2,6 +2,12 @@
 Changelog for package naoqi_rosbridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.5.4 (2015-08-27)
+------------------
+* remove useless include
+* add V Rabaud as a maintainer
+* Contributors: Vincent Rabaud
+
 0.5.3 (2015-08-26)
 ------------------
 * fix: advertise service in global ns
