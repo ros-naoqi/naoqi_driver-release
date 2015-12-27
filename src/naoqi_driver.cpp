@@ -60,6 +60,7 @@
  */
 #include "subscribers/teleop.hpp"
 #include "subscribers/moveto.hpp"
+#include "subscribers/speech.hpp"
 
 
 /*
@@ -745,7 +746,9 @@ void Driver::registerDefaultConverter()
     usc->registerCallback( message_actions::RECORD, boost::bind(&recorder::SonarRecorder::write, usr, _1) );
     usc->registerCallback( message_actions::LOG, boost::bind(&recorder::SonarRecorder::bufferize, usr, _1) );
     registerConverter( usc, usp, usr );
+  }
 
+  if ( audio_enabled ) {
     /** Audio */
     boost::shared_ptr<AudioEventRegister> event_register =
         boost::make_shared<AudioEventRegister>( "audio", 0, sessionPtr_ );
@@ -787,6 +790,7 @@ void Driver::registerDefaultSubscriber()
     return;
   registerSubscriber( boost::make_shared<naoqi::subscriber::TeleopSubscriber>("teleop", "/cmd_vel", "/joint_angles", sessionPtr_) );
   registerSubscriber( boost::make_shared<naoqi::subscriber::MovetoSubscriber>("moveto", "/move_base_simple/goal", sessionPtr_, tf2_buffer_) );
+  registerSubscriber( boost::make_shared<naoqi::subscriber::SpeechSubscriber>("speech", "/speech", sessionPtr_) );
 }
 
 void Driver::registerService( service::Service srv )
@@ -888,7 +892,7 @@ void Driver::setMasterURINet( const std::string& uri, const std::string& network
     }
   }
   // Start publishing again
-  publish_enabled_ = true;
+  startPublishing();
 
   if ( !keep_looping )
   {
