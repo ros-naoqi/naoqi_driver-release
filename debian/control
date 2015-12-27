@@ -1,0 +1,13 @@
+Source: ros-jade-naoqi-driver
+Section: misc
+Priority: extra
+Maintainer: Karsten Knese <karsten.knese@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), libboost-all-dev, ros-jade-catkin, ros-jade-cv-bridge, ros-jade-diagnostic-msgs, ros-jade-diagnostic-updater, ros-jade-geometry-msgs, ros-jade-image-transport, ros-jade-kdl-parser, ros-jade-naoqi-bridge-msgs (>= 0.0.4), ros-jade-naoqi-libqi, ros-jade-naoqi-libqicore, ros-jade-orocos-kdl, ros-jade-robot-state-publisher, ros-jade-rosbag-storage, ros-jade-rosgraph-msgs, ros-jade-sensor-msgs, ros-jade-tf2-geometry-msgs, ros-jade-tf2-msgs, ros-jade-tf2-ros
+Conflicts: ros-jade-nao-driver, ros-jade-naoqi-rosbridge
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-jade-naoqi-driver
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-all-dev, ros-jade-cv-bridge, ros-jade-image-transport, ros-jade-kdl-parser, ros-jade-naoqi-bridge-msgs (>= 0.0.4), ros-jade-naoqi-libqi, ros-jade-naoqi-libqicore, ros-jade-orocos-kdl, ros-jade-robot-state-publisher, ros-jade-rosbag-storage, ros-jade-tf2-ros
+Description: Driver module between Aldebaran's NAOqiOS and ROS. It publishes all sensor and actuator data as well as basic diagnostic for battery, termperature. It subscribes also to RVIZ simple goal and cmd_vel for teleop.
