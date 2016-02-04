@@ -1,3 +1,24 @@
+## naoqi_driver (indigo) - 0.5.7-0
+
+The packages in the `naoqi_driver` repository were released into the `indigo` distro by running `/usr/bin/bloom-release naoqi_driver --rosdistro indigo --track indigo` on `Thu, 04 Feb 2016 00:29:07 -0000`
+
+The `naoqi_driver` package was released.
+
+Version of package(s) in repository `naoqi_driver`:
+- upstream repository: https://github.com/ros-naoqi/alrosbridge.git
+- release repository: https://github.com/ros-naoqi/naoqi_driver-release.git
+- rosdistro version: `0.5.6-0`
+- old version: `0.5.6-0`
+- new version: `0.5.7-0`
+
+Versions of tools used:
+- bloom version: `0.5.20`
+- catkin_pkg version: `0.2.10`
+- rosdep version: `0.11.4`
+- rosdistro version: `0.4.2`
+- vcstools version: `0.1.38`
+
+
 ## naoqi_driver (jade) - 0.5.6-0
 
 The packages in the `naoqi_driver` repository were released into the `jade` distro by running `/usr/bin/bloom-release --track jade --rosdistro jade naoqi_driver` on `Sun, 27 Dec 2015 22:29:09 -0000`
