@@ -1,3 +1,26 @@
+## naoqi_driver (kinetic) - 0.5.8-1
+
+The packages in the `naoqi_driver` repository were released into the `kinetic` distro by running `/usr/bin/bloom-release --rosdistro kinetic --track kinetic naoqi_driver` on `Thu, 19 May 2016 20:47:03 -0000`
+
+The `naoqi_driver` package was released.
+
+Version of package(s) in repository `naoqi_driver`:
+
+- upstream repository: https://github.com/ros-naoqi/alrosbridge.git
+- release repository: unknown
+- rosdistro version: `null`
+- old version: `0.5.8-0`
+- new version: `0.5.8-1`
+
+Versions of tools used:
+
+- bloom version: `0.5.21`
+- catkin_pkg version: `0.2.10`
+- rosdep version: `0.11.4`
+- rosdistro version: `0.4.5`
+- vcstools version: `0.1.38`
+
+
 ## naoqi_driver (jade) - 0.5.7-0
 
 The packages in the `naoqi_driver` repository were released into the `jade` distro by running `/usr/bin/bloom-release naoqi_driver --rosdistro jade --track jade` on `Thu, 04 Feb 2016 00:44:25 -0000`
