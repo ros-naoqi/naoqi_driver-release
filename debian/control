@@ -1,0 +1,14 @@
+Source: ros-kinetic-naoqi-driver
+Section: misc
+Priority: extra
+Maintainer: Surya Ambrose <surya.ambrose@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), libboost-all-dev, ros-kinetic-catkin, ros-kinetic-cv-bridge, ros-kinetic-diagnostic-msgs, ros-kinetic-diagnostic-updater, ros-kinetic-geometry-msgs, ros-kinetic-image-transport, ros-kinetic-kdl-parser, ros-kinetic-naoqi-bridge-msgs (>= 0.0.4), ros-kinetic-naoqi-libqi, ros-kinetic-naoqi-libqicore, ros-kinetic-orocos-kdl, ros-kinetic-robot-state-publisher, ros-kinetic-rosbag-storage, ros-kinetic-rosgraph-msgs, ros-kinetic-sensor-msgs, ros-kinetic-tf2-geometry-msgs, ros-kinetic-tf2-msgs, ros-kinetic-tf2-ros
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-kinetic-naoqi-driver
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-all-dev, ros-kinetic-cv-bridge, ros-kinetic-image-transport, ros-kinetic-kdl-parser, ros-kinetic-naoqi-bridge-msgs (>= 0.0.4), ros-kinetic-naoqi-libqi, ros-kinetic-naoqi-libqicore, ros-kinetic-orocos-kdl, ros-kinetic-robot-state-publisher, ros-kinetic-rosbag-storage, ros-kinetic-tf2-ros
+Conflicts: ros-kinetic-nao-driver, ros-kinetic-naoqi-rosbridge
+Description: Driver module between Aldebaran's NAOqiOS and ROS.
+ It publishes all sensor and actuator data as well as basic diagnostic for battery, temperature. It subscribes also to RVIZ simple goal and cmd_vel for teleop.
