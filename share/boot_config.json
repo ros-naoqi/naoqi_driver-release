@@ -58,7 +58,7 @@
     "joint_states":
     {
       "enabled"       : true,
-      "frequency"     : 15
+      "frequency"     : 50
     },
     "laser":
     {
@@ -78,9 +78,18 @@
     {
       "enabled"       : true
     },
-    "tactile":
+    "touch_hand":
     {
       "enabled"       : true
+    },
+    "touch_head":
+    {
+      "enabled"       : true
+    },
+    "odom":
+    {
+      "enabled"       : true,
+      "frequency"     : 15
     }
   }
 }
