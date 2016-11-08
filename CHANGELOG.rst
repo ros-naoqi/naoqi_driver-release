@@ -2,6 +2,38 @@
 Changelog for package naoqi_rosbridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.5.9 (2016-11-08)
+------------------
+* -Vincent Rabaud as a maintainer, +Natalia Lyubova
+* Merge pull request `#75 <https://github.com/ros-naoqi/naoqi_driver/issues/75>`_ from kochigami/rename-tactile-touch-to-head-touch
+  rename tactile touch to head touch
+* rename boot_config name of hand & head
+* rename tactile touch to head touch
+* Merge pull request `#63 <https://github.com/ros-naoqi/naoqi_driver/issues/63>`_ from kochigami/add-hand-touch-sensor-input-to-touch-programs
+  Add hand touch sensor input to touch event and converters
+* add hand touch sensor input to touch programs
+* Merge pull request `#74 <https://github.com/ros-naoqi/naoqi_driver/issues/74>`_ from kochigami/try-depth-raw
+  kRawDepthColorSpace for depth image
+* Merge pull request `#36 <https://github.com/ros-naoqi/naoqi_driver/issues/36>`_ from laurent-george/adding_odom_frame
+  Adding odom topic to the bridge
+* fix(odom): update code based on comment in pull request
+* Adding odom topic to the bridge
+* Merge pull request `#72 <https://github.com/ros-naoqi/naoqi_driver/issues/72>`_ from furushchev/increase-joint-state-freq
+  [share/boot_config.json] increase frequency for publishing joint_states
+* [share/boot_config.json] increase frequency for publishing joint_states
+* Update package.xml
+* kRawDepthColorSpace for depth image
+* Contributors: Kanae Kochigami, Karsten Knese, Laurent GEORGE, Mikael Arguedas, Natalia Lyubova, Vincent Rabaud, Yuki Furuta, lgeorge
+
+0.5.8 (2016-05-19)
+------------------
+* Update maintainership
+* Fix broken compilation with libqi-2.5 (`#67 <https://github.com/ros-naoqi/naoqi_driver/issues/67>`_)
+  -std=gnu++11 is not mandatory as this flag will be added when importing libqi
+  (https://github.com/ros-naoqi/libqi-release/commit/c26f57e25326c9d3447ae7113818a474994e5544).
+  naoqi_driver should now work with libqi2.3 and 2.5
+* Contributors: Surya Ambrose
+
 0.5.7 (2016-02-04)
 ------------------
 * Fix termination issues (`#62 <https://github.com/ros-naoqi/naoqi_driver/pull/62>`_)

@@ -39,6 +39,7 @@
 #include "converters/memory/int.hpp"
 #include "converters/memory/string.hpp"
 #include "converters/log.hpp"
+#include "converters/odom.hpp"
 
 /*
  * PUBLISHERS
@@ -569,16 +570,20 @@ void Driver::registerDefaultConverter()
   size_t camera_ir_recorder_fps       = boot_config_.get( "converters.ir_camera.recorder_fps", 5);
 
   bool joint_states_enabled           = boot_config_.get( "converters.joint_states.enabled", true);
-  size_t joint_states_frequency       = boot_config_.get( "converters.joint_states.frequency", 15);
+  size_t joint_states_frequency       = boot_config_.get( "converters.joint_states.frequency", 50);
 
   bool laser_enabled                  = boot_config_.get( "converters.laser.enabled", true);
   size_t laser_frequency              = boot_config_.get( "converters.laser.frequency", 10);
 
   bool sonar_enabled                  = boot_config_.get( "converters.sonar.enabled", true);
   size_t sonar_frequency              = boot_config_.get( "converters.sonar.frequency", 10);
-
+  
+  bool odom_enabled                  = boot_config_.get( "converters.odom.enabled", true);
+  size_t odom_frequency              = boot_config_.get( "converters.odom.frequency", 10);
+  
   bool bumper_enabled                 = boot_config_.get( "converters.bumper.enabled", true);
-  bool tactile_enabled                = boot_config_.get( "converters.tactile.enabled", true);
+  bool hand_enabled                   = boot_config_.get( "converters.touch_hand.enabled", true);
+  bool head_enabled                   = boot_config_.get( "converters.touch_head.enabled", true);
   /*
    * The info converter will be called once after it was added to the priority queue. Once it is its turn to be called, its
    * callAll method will be triggered (because InfoPublisher is considered to always have subscribers, isSubscribed always
@@ -785,24 +790,57 @@ void Driver::registerDefaultConverter()
     }
   }
 
-  if ( tactile_enabled )
+  if ( hand_enabled )
   {
-    std::vector<std::string> tactile_touch_events;
-    tactile_touch_events.push_back("FrontTactilTouched");
-    tactile_touch_events.push_back("MiddleTactilTouched");
-    tactile_touch_events.push_back("RearTactilTouched");
-    boost::shared_ptr<TactileTouchEventRegister> event_register =
-      boost::make_shared<TactileTouchEventRegister>( "tactile_touch", tactile_touch_events, 0, sessionPtr_ );
-    insertEventConverter("tactile_touch", event_register);
+    std::vector<std::string> hand_touch_events;
+    hand_touch_events.push_back("HandRightBackTouched");
+    hand_touch_events.push_back("HandRightLeftTouched");
+    hand_touch_events.push_back("HandRightRightTouched");
+    hand_touch_events.push_back("HandLeftBackTouched");
+    hand_touch_events.push_back("HandLeftLeftTouched");
+    hand_touch_events.push_back("HandLeftRightTouched");
+    boost::shared_ptr<HandTouchEventRegister> event_register =
+      boost::make_shared<HandTouchEventRegister>( "hand_touch", hand_touch_events, 0, sessionPtr_ );
+    insertEventConverter("hand_touch", event_register);
     if (keep_looping) {
-      event_map_.find("tactile_touch")->second.startProcess();
+      event_map_.find("hand_touch")->second.startProcess();
     }
     if (publish_enabled_) {
-      event_map_.find("tactile_touch")->second.isPublishing(true);
+      event_map_.find("hand_touch")->second.isPublishing(true);
     }
   }
 
+  if ( head_enabled )
+  {
+    std::vector<std::string> head_touch_events;
+    head_touch_events.push_back("FrontTactilTouched");
+    head_touch_events.push_back("MiddleTactilTouched");
+    head_touch_events.push_back("RearTactilTouched");
+    boost::shared_ptr<HeadTouchEventRegister> event_register =
+      boost::make_shared<HeadTouchEventRegister>( "head_touch", head_touch_events, 0, sessionPtr_ );
+    insertEventConverter("head_touch", event_register);
+    if (keep_looping) {
+      event_map_.find("head_touch")->second.startProcess();
+    }
+    if (publish_enabled_) {
+      event_map_.find("head_touch")->second.isPublishing(true);
+    }
+  }
+  
+  /** Odom */
+  if ( odom_enabled )
+  {
+    boost::shared_ptr<publisher::BasicPublisher<nav_msgs::Odometry> > lp = boost::make_shared<publisher::BasicPublisher<nav_msgs::Odometry> >( "odom" );
+    boost::shared_ptr<recorder::BasicRecorder<nav_msgs::Odometry> > lr = boost::make_shared<recorder::BasicRecorder<nav_msgs::Odometry> >( "odom" );
+    boost::shared_ptr<converter::OdomConverter> lc = boost::make_shared<converter::OdomConverter>( "odom", odom_frequency, sessionPtr_ );
+    lc->registerCallback( message_actions::PUBLISH, boost::bind(&publisher::BasicPublisher<nav_msgs::Odometry>::publish, lp, _1) );
+    lc->registerCallback( message_actions::RECORD, boost::bind(&recorder::BasicRecorder<nav_msgs::Odometry>::write, lr, _1) );
+    lc->registerCallback( message_actions::LOG, boost::bind(&recorder::BasicRecorder<nav_msgs::Odometry>::bufferize, lr, _1) );
+    registerConverter( lc, lp, lr );
+  }
+  
 }
+
 
 // public interface here
 void Driver::registerSubscriber( subscriber::Subscriber sub )
