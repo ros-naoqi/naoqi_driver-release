@@ -1,3 +1,26 @@
+## naoqi_driver (melodic) - 0.5.11-0
+
+The packages in the `naoqi_driver` repository were released into the `melodic` distro by running `/usr/bin/bloom-release naoqi_driver --track melodic --rosdistro melodic` on `Wed, 08 Jan 2020 12:03:43 -0000`
+
+The `naoqi_driver` package was released.
+
+Version of package(s) in repository `naoqi_driver`:
+
+- upstream repository: https://github.com/ros-naoqi/alrosbridge.git
+- release repository: unknown
+- rosdistro version: `null`
+- old version: `0.5.11--1`
+- new version: `0.5.11-0`
+
+Versions of tools used:
+
+- bloom version: `0.9.0`
+- catkin_pkg version: `0.4.15`
+- rosdep version: `0.16.1`
+- rosdistro version: `0.8.0`
+- vcstools version: `0.1.42`
+
+
 ## naoqi_driver (kinetic) - 0.5.11-1
 
 The packages in the `naoqi_driver` repository were released into the `kinetic` distro by running `/usr/bin/bloom-release naoqi_driver --track kinetic --rosdistro kinetic` on `Wed, 08 Jan 2020 11:50:53 -0000`
