@@ -113,7 +113,7 @@ tracks:
     - git-bloom-generate -y rosrpm --prefix release/:{ros_distro} :{ros_distro} -i
       :{release_inc} --os-name rhel
     devel_branch: null
-    last_version: 0.5.12
+    last_version: 0.5.13
     name: upstream
     patches: null
     release_inc: '-1'
@@ -121,6 +121,6 @@ tracks:
     release_tag: :{version}
     ros_distro: noetic
     vcs_type: git
-    vcs_uri: https://github.com/ros-naoqi/alrosbridge.git
+    vcs_uri: https://github.com/ros-naoqi/naoqi_driver.git
     version: :{auto}
 
