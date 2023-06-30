@@ -476,7 +476,7 @@ bool Driver::registerMemoryConverter( const std::string& key, float frequency, c
   dataType::DataType data_type;
   qi::AnyValue value;
   try {
-    qi::AnyObject p_memory = sessionPtr_->service("ALMemory");
+    qi::AnyObject p_memory = sessionPtr_->service("ALMemory").value();
     value = p_memory.call<qi::AnyValue>("getData", key);
   } catch (const std::exception& e) {
     std::cout << BOLDRED << "Could not get data in memory for the key: "
@@ -818,14 +818,20 @@ void Driver::registerDefaultConverter()
 
   if ( audio_enabled ) {
     /** Audio */
-    boost::shared_ptr<AudioEventRegister> event_register =
-        boost::make_shared<AudioEventRegister>( "audio", 0, sessionPtr_ );
-    insertEventConverter("audio", event_register);
-    if (keep_looping) {
-      event_map_.find("audio")->second.startProcess();
-    }
-    if (publish_enabled_) {
-      event_map_.find("audio")->second.isPublishing(true);
+    // Not supported for NAOqi 2.9
+    auto naoqi_version = helpers::driver::getNaoqiVersion(sessionPtr_);
+    if (helpers::driver::isNaoqiVersionLesser(naoqi_version, 2, 9)) {
+      boost::shared_ptr<AudioEventRegister> event_register =
+          boost::make_shared<AudioEventRegister>("audio", 0, sessionPtr_);
+      insertEventConverter("audio", event_register);
+      if (keep_looping) {
+        event_map_.find("audio")->second.startProcess();
+      }
+      if (publish_enabled_) {
+        event_map_.find("audio")->second.isPublishing(true);
+      }
+    } else {
+      std::cout << "Audio is not supported for NAOqi version 2.9 or greater, disabled." << std::endl;
     }
   }
 
@@ -1289,7 +1295,7 @@ bool Driver::registerEventConverter(const std::string& key, const dataType::Data
   dataType::DataType data_type;
   qi::AnyValue value;
   try {
-    qi::AnyObject p_memory = sessionPtr_->service("ALMemory");
+    qi::AnyObject p_memory = sessionPtr_->service("ALMemory").value();
     value = p_memory.call<qi::AnyValue>("getData", key);
   } catch (const std::exception& e) {
     std::cout << BOLDRED << "Could not get data in memory for the key: "
