@@ -1,3 +1,26 @@
+## naoqi_driver (noetic) - 0.6.0-1
+
+The packages in the `naoqi_driver` repository were released into the `noetic` distro by running `/usr/bin/bloom-release naoqi_driver --ros-distro noetic` on `Fri, 30 Jun 2023 21:55:28 -0000`
+
+The `naoqi_driver` package was released.
+
+Version of package(s) in repository `naoqi_driver`:
+
+- upstream repository: https://github.com/ros-naoqi/naoqi_driver.git
+- release repository: https://github.com/ros-naoqi/naoqi_driver-release.git
+- rosdistro version: `0.5.13-0`
+- old version: `0.5.13-0`
+- new version: `0.6.0-1`
+
+Versions of tools used:
+
+- bloom version: `0.11.2`
+- catkin_pkg version: `0.5.2`
+- rosdep version: `0.22.2`
+- rosdistro version: `0.9.0`
+- vcstools version: `0.1.42`
+
+
 ## naoqi_driver (noetic) - 0.5.13-0
 
 The packages in the `naoqi_driver` repository were released into the `noetic` distro by running `/usr/bin/bloom-release --rosdistro noetic --track noetic naoqi_driver` on `Tue, 13 Sep 2022 23:31:05 -0000`
